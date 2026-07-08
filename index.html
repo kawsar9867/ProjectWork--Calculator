@@ -9,8 +9,7 @@
   <body
     class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 min-h-screen flex items-center justify-center"
   >
-    <div class="bg-gray-900 p-6 rounded-b-3xl  rounded-t-2xl shadow-2xl w-80">
-      <!-- Display -->
+    <div class="bg-gray-900 p-6 rounded-b-3xl rounded-t-2xl shadow-2xl w-80">
       <input
         type="text"
         id="display"
@@ -18,9 +17,7 @@
         class="w-full h-20 mb-5 rounded-xl border bg-gray-800 text-white text-right text-3xl px-4 outline-none"
       />
 
-      <!-- Buttons -->
       <div class="grid grid-cols-4 gap-3">
-        <!-- Row 1 -->
         <button
           onclick="clearDisplay()"
           class="h-16 rounded-2xl bg-red-500 hover:bg-red-600 active:scale-95 transition text-white text-xl font-bold"
@@ -36,7 +33,7 @@
         </button>
 
         <button
-          onclick="appendValue('%')"
+          onclick="handlePercentage()"
           class="h-16 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-95 transition text-white text-xl font-bold"
         >
           %
@@ -49,7 +46,6 @@
           ÷
         </button>
 
-        <!-- Row 2 -->
         <button
           onclick="appendValue('7')"
           class="h-16 rounded-2xl bg-gray-700 hover:bg-gray-600 active:scale-95 transition text-white text-2xl"
@@ -78,7 +74,6 @@
           ×
         </button>
 
-        <!-- Row 3 -->
         <button
           onclick="appendValue('4')"
           class="h-16 rounded-2xl bg-gray-700 hover:bg-gray-600 active:scale-95 transition text-white text-2xl"
@@ -107,7 +102,6 @@
           −
         </button>
 
-        <!-- Row 4 -->
         <button
           onclick="appendValue('1')"
           class="h-16 rounded-2xl bg-gray-700 hover:bg-gray-600 active:scale-95 transition text-white text-2xl"
@@ -136,7 +130,6 @@
           +
         </button>
 
-        <!-- Row 5 -->
         <button
           onclick="appendValue('0')"
           class="col-span-2 h-16 rounded-2xl bg-gray-700 hover:bg-gray-600 active:scale-95 transition text-white text-2xl"
@@ -175,11 +168,43 @@
         display.value = display.value.slice(0, -1);
       }
 
+      function handlePercentage() {
+        let currentVal = display.value;
+        if (currentVal === "") return;
+
+        const parts = currentVal.split(/([\+\-\*\/])/);
+        let lastNumberStr = parts[parts.length - 1];
+
+        if (!lastNumberStr || isNaN(lastNumberStr)) return;
+
+        let lastNumber = parseFloat(lastNumberStr);
+        let percentageValue;
+
+        if (parts.length >= 3) {
+          let firstNumber = parseFloat(parts[0]);
+          let operator = parts[1];
+
+          if (operator === "+" || operator === "-") {
+            percentageValue = (firstNumber * lastNumber) / 100;
+          } else {
+            percentageValue = lastNumber / 100;
+          }
+        } else {
+          percentageValue = lastNumber / 100;
+        }
+
+        parts[parts.length - 1] = percentageValue;
+        display.value = parts.join("");
+      }
+
       function calculate() {
         try {
-          display.value = Function(
+          if (display.value === "") return;
+
+          const result = Function(
             '"use strict"; return (' + display.value + ")",
           )();
+          display.value = Number(result.toFixed(8)).toString();
         } catch {
           display.value = "Error";
         }
